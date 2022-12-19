@@ -129,4 +129,3 @@ dmypy.json
 .pyre/
 
 # Python scripts
-del_virus.py
