@@ -44,8 +44,7 @@ class Uploads(object):
 
             print("\nFilename: ", path, "\n")
 
-            if self.delete_virus:
-                self.del_virus(uploads_path)
+            self.del_virus(uploads_path)
 
             if self.zip_uploads:
                 try:
@@ -63,7 +62,7 @@ class Uploads(object):
 
         files = [
             os.path.join(path, name)
-            for path, subdirs, files in os.walk(uploads_path)
+            for path, _, files in os.walk(uploads_path)
             for name in files
         ]
 
@@ -72,8 +71,10 @@ class Uploads(object):
             extension = filename.split(".")[-1]
             if extension != "htaccess":
                 if extension == "php" or extension == "ico" or len(extension) > 4:
-                    print("Suspicious file deleted: ", file)
-                    os.remove(file)
+                    print("Suspicious file: ", file)
+                    if self.delete_virus:
+                        os.remove(file)
+                        print("Suspicious file deleted: ", filename)
 
 
 if __name__ == "__main__":
