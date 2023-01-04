@@ -1,13 +1,12 @@
 import os
 from argparse import ArgumentParser
 
-sp = os.path.sep
-
 
 class DeleteVirus(object):
-    def __init__(self, input_dir: str, delete_virus: bool,) -> None:
+    def __init__(self, input_dir: str, delete_virus: bool, delete_html: bool) -> None:
         self.input_dir = input_dir
         self.delete_virus = delete_virus
+        self.delete_html = delete_html
 
     def del_virus(self):
         """
@@ -26,9 +25,21 @@ class DeleteVirus(object):
             filename = os.path.split(file)[-1]
             extension = filename.split(".")[-1]
             if extension != "htaccess":
-                if extension == "php" or extension == "ico" or len(extension) > 4:
+                if (
+                    extension == "php"
+                    or extension == "ico"
+                    or extension == "html"
+                    or len(extension) > 4
+                ):
                     print("Suspicious file: ", file)
-                    if self.delete_virus:
+
+                if self.delete_html:
+                    if extension == "html" or len(extension) > 4:
+                        os.remove(file)
+                        print("Suspicious file deleted: ", filename)
+
+                if delete_virus:
+                    if extension == "php" or extension == "ico" or len(extension) > 4:
                         os.remove(file)
                         print("Suspicious file deleted: ", filename)
 
@@ -41,11 +52,18 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d", "--delete_virus", action="store_true", help="Deleta arquivos suspeitos."
     )
+    parser.add_argument(
+        "-html",
+        "--delete_html",
+        action="store_true",
+        help="Deleta arquivos html suspeitos.",
+    )
 
     args = parser.parse_args()
 
     input_dir = args.input_dir
     delete_virus = args.delete_virus
+    delete_html = args.delete_html
 
-    uploads = DeleteVirus(input_dir, delete_virus)
+    uploads = DeleteVirus(input_dir, delete_virus, delete_html)
     uploads.del_virus()
