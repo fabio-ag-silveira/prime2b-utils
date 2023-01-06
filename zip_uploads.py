@@ -22,12 +22,14 @@ class Uploads(object):
         self.directories_net_br = list(glob(os.path.join(self.input_dir, "*.net.br")))
         self.directories_ind_br = list(glob(os.path.join(self.input_dir, "*.ind.br")))
         self.directories_vet_br = list(glob(os.path.join(self.input_dir, "*.vet.br")))
+        self.directories_org_br = list(glob(os.path.join(self.input_dir, "*.org.br")))
         self.directories_list = set(
             self.directories_com
             + self.directories_com_br
             + self.directories_net_br
             + self.directories_ind_br
             + self.directories_vet_br
+            + self.directories_org_br
         )
 
     def zip_files(self):
