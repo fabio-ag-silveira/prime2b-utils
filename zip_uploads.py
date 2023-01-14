@@ -72,9 +72,21 @@ class Uploads(object):
             filename = os.path.split(file)[-1]
             extension = filename.split(".")[-1]
             if extension != "htaccess":
-                if extension == "php" or extension == "ico" or len(extension) > 4:
+                if (
+                    extension == "php"
+                    or extension == "ico"
+                    or extension == "html"
+                    or len(extension) > 4
+                ):
                     print("Suspicious file: ", file)
-                    if self.delete_virus:
+
+                if delete_virus:
+                    if (
+                        extension == "php"
+                        or extension == "ico"
+                        or extension == "html"
+                        or len(extension) > 4
+                    ):
                         os.remove(file)
                         print("Suspicious file deleted: ", filename)
 
