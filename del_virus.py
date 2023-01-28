@@ -1,6 +1,18 @@
 import os
 from argparse import ArgumentParser
 
+HTACCESS = """
+<FilesMatch ".(py|exe|php)$">
+ Order allow,deny
+ Deny from all
+</FilesMatch>
+
+<FilesMatch "^(about.php|radio.php|index.php|content.php|lock360.php|admin.php|wp-login.php)$">
+ Order allow,deny
+ Deny from all
+</FilesMatch>
+"""
+
 
 class DeleteVirus(object):
     def __init__(self, input_dir: str, delete_virus: bool) -> None:
@@ -9,9 +21,9 @@ class DeleteVirus(object):
 
     def del_virus(self):
         """
-            Encontra e deleta arquivos suspeitos dentro do diretorio 'uploads' e seus subdiretorios.
-            Ex: 'filename.ico', 'filename.php' ou arquivos com nome maior que 4 caracteres, que nao sejam 
-            o arquivo '.htaccess'.
+        Encontra e deleta arquivos suspeitos dentro do diretorio 'uploads' e seus subdiretorios.
+        Ex: 'filename.ico', 'filename.php' ou arquivos com nome maior que 4 caracteres, que nao sejam
+        o arquivo '.htaccess'.
         """
 
         files = [
@@ -28,6 +40,9 @@ class DeleteVirus(object):
                     extension == "php"
                     or extension == "ico"
                     or extension == "html"
+                    or extension == "ogv"
+                    or extension == "m3u"
+                    or extension == "swf"
                     or len(extension) > 4
                 ):
                     print("Suspicious file: ", file)
@@ -37,16 +52,25 @@ class DeleteVirus(object):
                         extension == "php"
                         or extension == "ico"
                         or extension == "html"
+                        or extension == "ogv"
+                        or extension == "m3u"
+                        or extension == "swf"
                         or len(extension) > 4
                     ):
                         os.remove(file)
                         print("Suspicious file deleted: ", filename)
+            else:
+                with open(file, "w") as write_htaccess:
+                    write_htaccess.write(HTACCESS)
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument(
-        "-i", "--input_dir", type=str, help="Diretorio onde se encontra uploads.",
+        "-i",
+        "--input_dir",
+        type=str,
+        help="Diretorio onde se encontra uploads.",
     )
     parser.add_argument(
         "-d", "--delete_virus", action="store_true", help="Deleta arquivos suspeitos."

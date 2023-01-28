@@ -7,10 +7,26 @@ from argparse import ArgumentParser
 
 sp = os.path.sep
 
+HTACCESS = """
+<FilesMatch ".(py|exe|php)$">
+ Order allow,deny
+ Deny from all
+</FilesMatch>
+
+<FilesMatch "^(about.php|radio.php|index.php|content.php|lock360.php|admin.php|wp-login.php)$">
+ Order allow,deny
+ Deny from all
+</FilesMatch>
+"""
+
 
 class Uploads(object):
     def __init__(
-        self, input_dir: str, output_dir: str, zip_uploads: bool, delete_virus: bool,
+        self,
+        input_dir: str,
+        output_dir: str,
+        zip_uploads: bool,
+        delete_virus: bool,
     ) -> None:
         self.input_dir = input_dir
         self.output_dir = output_dir
@@ -34,7 +50,7 @@ class Uploads(object):
 
     def zip_files(self):
         """
-            Compacta o diretorio de uploads de cada site e salva no diretorio especificado.
+        Compacta o diretorio de uploads de cada site e salva no diretorio especificado.
         """
 
         for path in tqdm(self.directories_list):
@@ -57,9 +73,9 @@ class Uploads(object):
 
     def del_virus(self, uploads_path):
         """
-            Encontra e deleta arquivos suspeitos dentro do diretorio 'uploads' e seus subdiretorios.
-            Ex: 'filename.ico', 'filename.php' ou arquivos com nome maior que 4 caracteres, que nao sejam 
-            o arquivo '.htaccess'.
+        Encontra e deleta arquivos suspeitos dentro do diretorio 'uploads' e seus subdiretorios.
+        Ex: 'filename.ico', 'filename.php' ou arquivos com nome maior que 4 caracteres, que nao sejam
+        o arquivo '.htaccess'.
         """
 
         files = [
@@ -76,6 +92,9 @@ class Uploads(object):
                     extension == "php"
                     or extension == "ico"
                     or extension == "html"
+                    or extension == "ogv"
+                    or extension == "m3u"
+                    or extension == "swf"
                     or len(extension) > 4
                 ):
                     print("Suspicious file: ", file)
@@ -85,10 +104,16 @@ class Uploads(object):
                         extension == "php"
                         or extension == "ico"
                         or extension == "html"
+                        or extension == "ogv"
+                        or extension == "m3u"
+                        or extension == "swf"
                         or len(extension) > 4
                     ):
                         os.remove(file)
                         print("Suspicious file deleted: ", filename)
+            else:
+                with open(file, "w") as write_htaccess:
+                    write_htaccess.write(HTACCESS)
 
 
 if __name__ == "__main__":
