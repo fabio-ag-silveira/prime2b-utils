@@ -13,6 +13,25 @@ HTACCESS = """
 </FilesMatch>
 """
 
+ALL_EXTENSIONS = []
+
+EXTENSIONS = [
+    "bmp",
+    "jpg",
+    "xml",
+    "zip",
+    "js",
+    "jpeg",
+    "css",
+    "pdf",
+    "webp",
+    "tiff",
+    "svg",
+    "mp4",
+    "json",
+    "png",
+]
+
 
 class DeleteVirus(object):
     def __init__(self, input_dir: str, delete_virus: bool) -> None:
@@ -23,7 +42,7 @@ class DeleteVirus(object):
         """
         Encontra e deleta arquivos suspeitos dentro do diretorio 'uploads' e seus subdiretorios.
         Ex: 'filename.ico', 'filename.php' ou arquivos com nome maior que 4 caracteres, que nao sejam
-        o arquivo '.htaccess'.
+        o arquivo '.htaccess'. Arquivos '.htaccess' são reescritos com as permissoes alteradas.
         """
 
         files = [
@@ -35,33 +54,19 @@ class DeleteVirus(object):
         for file in files:
             filename = os.path.split(file)[-1]
             extension = filename.split(".")[-1]
+            # ALL_EXTENSIONS.append(extension)
             if extension != "htaccess":
-                if (
-                    extension == "php"
-                    or extension == "ico"
-                    or extension == "html"
-                    or extension == "ogv"
-                    or extension == "m3u"
-                    or extension == "swf"
-                    or len(extension) > 4
-                ):
+                if extension not in EXTENSIONS or len(extension) > 4:
                     print("Suspicious file: ", file)
 
                 if delete_virus:
-                    if (
-                        extension == "php"
-                        or extension == "ico"
-                        or extension == "html"
-                        or extension == "ogv"
-                        or extension == "m3u"
-                        or extension == "swf"
-                        or len(extension) > 4
-                    ):
+                    if extension not in EXTENSIONS or len(extension) > 4:
                         os.remove(file)
                         print("Suspicious file deleted: ", filename)
             else:
                 with open(file, "w") as write_htaccess:
                     write_htaccess.write(HTACCESS)
+        # print(set(ALL_EXTENSIONS))
 
 
 if __name__ == "__main__":
