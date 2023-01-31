@@ -19,6 +19,25 @@ HTACCESS = """
 </FilesMatch>
 """
 
+ALL_EXTENSIONS = []
+
+EXTENSIONS = [
+    "bmp",
+    "jpg",
+    "xml",
+    # "zip",
+    "js",
+    "jpeg",
+    "css",
+    "pdf",
+    "webp",
+    "tiff",
+    "svg",
+    "mp4",
+    "json",
+    "png",
+]
+
 
 class Uploads(object):
     def __init__(
@@ -48,14 +67,14 @@ class Uploads(object):
             + self.directories_org_br
         )
 
-    def zip_files(self):
+    def zip_files(self) -> None:
         """
         Compacta o diretorio de uploads de cada site e salva no diretorio especificado.
         """
 
         for path in tqdm(self.directories_list):
 
-            uploads_dir = f"htdocs{sp}wp-content{sp}uploads"
+            uploads_dir = "htdocs{}wp-content{}uploads".format(sp, sp)
             uploads_path = os.path.join(path, uploads_dir)
             output_filename = os.path.split(path)[-1].replace(".", "_")
             zip_file_path = os.path.join(self.output_dir, output_filename)
@@ -71,11 +90,11 @@ class Uploads(object):
                 except FileNotFoundError:
                     print("Diretorio de uploads nao encontrado.")
 
-    def del_virus(self, uploads_path):
+    def del_virus(self, uploads_path) -> None:
         """
         Encontra e deleta arquivos suspeitos dentro do diretorio 'uploads' e seus subdiretorios.
         Ex: 'filename.ico', 'filename.php' ou arquivos com nome maior que 4 caracteres, que nao sejam
-        o arquivo '.htaccess'.
+        o arquivo '.htaccess'. Arquivos '.htaccess' são reescritos com as permissoes alteradas.
         """
 
         files = [
@@ -87,33 +106,20 @@ class Uploads(object):
         for file in files:
             filename = os.path.split(file)[-1]
             extension = filename.split(".")[-1]
+            # ALL_EXTENSIONS.append(extension)
             if extension != "htaccess":
-                if (
-                    extension == "php"
-                    or extension == "ico"
-                    or extension == "html"
-                    or extension == "ogv"
-                    or extension == "m3u"
-                    or extension == "swf"
-                    or len(extension) > 4
-                ):
+                if extension not in EXTENSIONS or len(extension) > 4:
                     print("Suspicious file: ", file)
 
                 if delete_virus:
-                    if (
-                        extension == "php"
-                        or extension == "ico"
-                        or extension == "html"
-                        or extension == "ogv"
-                        or extension == "m3u"
-                        or extension == "swf"
-                        or len(extension) > 4
-                    ):
+                    if extension not in EXTENSIONS or len(extension) > 4:
                         os.remove(file)
-                        print("Suspicious file deleted: ", filename)
+                        print("Suspicious file deleted: ", filename, end="\n")
             else:
                 with open(file, "w") as write_htaccess:
                     write_htaccess.write(HTACCESS)
+                    print(".htaccess updated.", end="\n")
+        # print(set(ALL_EXTENSIONS))
 
 
 if __name__ == "__main__":
@@ -128,7 +134,7 @@ if __name__ == "__main__":
         "-o",
         "--output_dir",
         type=str,
-        default=f".{sp}uploads_zip",
+        default=".{}uploads_zip".format(sp),
         help="Diretorio onde os arquivos .zip da pasta 'uploads' serao salvos.",
     )
     parser.add_argument(

@@ -19,7 +19,7 @@ EXTENSIONS = [
     "bmp",
     "jpg",
     "xml",
-    "zip",
+    # "zip",
     "js",
     "jpeg",
     "css",
@@ -38,7 +38,7 @@ class DeleteVirus(object):
         self.input_dir = input_dir
         self.delete_virus = delete_virus
 
-    def del_virus(self):
+    def del_virus(self) -> None:
         """
         Encontra e deleta arquivos suspeitos dentro do diretorio 'uploads' e seus subdiretorios.
         Ex: 'filename.ico', 'filename.php' ou arquivos com nome maior que 4 caracteres, que nao sejam
