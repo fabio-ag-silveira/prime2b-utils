@@ -25,7 +25,7 @@ EXTENSIONS = [
     "bmp",
     "jpg",
     "xml",
-    # "zip",
+    "gif",
     "js",
     "jpeg",
     "css",
@@ -118,7 +118,6 @@ class Uploads(object):
             else:
                 with open(file, "w") as write_htaccess:
                     write_htaccess.write(HTACCESS)
-                    print(".htaccess updated.", end="\n")
         # print(set(ALL_EXTENSIONS))
 
 

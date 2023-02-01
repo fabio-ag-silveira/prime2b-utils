@@ -19,7 +19,7 @@ EXTENSIONS = [
     "bmp",
     "jpg",
     "xml",
-    # "zip",
+    "gif",
     "js",
     "jpeg",
     "css",
