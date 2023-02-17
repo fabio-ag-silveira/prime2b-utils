@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 
 # Python scripts
+zip_uploads_cloudways.py
