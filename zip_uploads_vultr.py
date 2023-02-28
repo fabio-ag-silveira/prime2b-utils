@@ -4,6 +4,7 @@ import shutil
 from tqdm import tqdm
 from glob import glob
 from argparse import ArgumentParser
+from PIL import Image
 
 sp = os.path.sep
 
@@ -44,12 +45,12 @@ class Uploads(object):
         input_dir: str,
         output_dir: str,
         zip_uploads: bool,
-        delete_virus: bool,
+        delete_suspicious_file: bool,
     ) -> None:
         self.input_dir = input_dir
         self.output_dir = output_dir
         self.zip_uploads = zip_uploads
-        self.delete_virus = delete_virus
+        self.delete_suspicious_file = delete_suspicious_file
 
         self.directories_com = list(glob(os.path.join(self.input_dir, "*.com")))
         self.directories_br = list(glob(os.path.join(self.input_dir, "*.br")))
@@ -85,6 +86,7 @@ class Uploads(object):
         Ex: 'filename.ico', 'filename.php' ou arquivos com nome maior que 4 caracteres, que nao sejam
         o arquivo '.htaccess'. Arquivos '.htaccess' sao reescritos com as permissoes alteradas.
         """
+        number_of_suspicious_files = 0
 
         files = [
             os.path.join(path, name)
@@ -92,43 +94,77 @@ class Uploads(object):
             for name in files
         ]
 
-        for file in files:
-            filename = os.path.split(file)[-1]
-            extension = filename.split(".")[-1]
-            if extension != "htaccess":
-                if extension not in EXTENSIONS or len(extension) > 4:
-                    print("Suspicious file: ", file)
-                    if delete_virus:
-                        os.remove(file)
-                        print("Suspicious file deleted: ", filename)
-                else:
-                    if self.check_file_content(file):
-                        print("Suspicious file: ", file)
-                        if delete_virus:
-                            os.remove(file)
-                            print("Suspicious file deleted: ", filename)
-            else:
-                with open(file, "w") as write_htaccess:
+        for file_path in files:
+            filename = os.path.basename(file_path)
+            if filename.endswith(".htaccess"):
+                with open(file_path, "w") as write_htaccess:
                     write_htaccess.write(HTACCESS)
+            else:
+                extension = os.path.splitext(filename)[1].lower()[1:]
+                if extension not in EXTENSIONS or len(extension) > 4:
+                    number_of_suspicious_files += 1
+                    print("Suspicious file: ", file_path)
+                    self.delete_file(file_path)
+                else:
+                    if self.check_file_content(file_path):
+                        number_of_suspicious_files += 1
+                        print("Suspicious file: ", file_path)
+                        self.delete_file(file_path)
+
+        print("\n{} suspicious files were found.\n".format(number_of_suspicious_files))
+
+        if self.delete_suspicious_file and number_of_suspicious_files > 0:
+            print(
+                "All {} suspicious files was deleted.\n".format(
+                    number_of_suspicious_files
+                )
+            )
+            number_of_suspicious_files = 0
+
+    def delete_file(self, file_path) -> None:
+        """
+        Delete the suspicious file.
+        """
+        if self.delete_suspicious_file:
+            os.remove(file_path)
 
     def check_file_content(self, file):
+        """
+        Check the file contents. Returns True if the file has HTML or image/video content,
+        otherwise returns False.
+        """
+        html_php_tags = ["<?php", "<!doctype", "<html", "<head", "<body", "<script"]
+
+        # Check for image or video content
         try:
-            with open(file) as read_file:
-                first_line = read_file.readline()
+            img = Image.open(file)
+            img_format = img.format
+            if img_format in [
+                "JPEG",
+                "PNG",
+                "GIF",
+                "BMP",
+                "TIFF",
+                "WEBP",
+                "AVI",
+                "MP4",
+                "MKV",
+                "MOV",
+            ]:
+                return False
+        except:
+            with open(file, "rb") as f:
+                header = f.read(32)
 
-            first_line_sliced = first_line[:10]
+            first_line = header.decode("utf-8")
 
-            if (
-                "<?php" in first_line_sliced
-                or "<script>" in first_line_sliced
-                or "<!DOCTYPE" in first_line_sliced
-                or "<html" in first_line_sliced
+            # Check for HTML or PHP content
+            if any(
+                html_php_tag in first_line.lower() for html_php_tag in html_php_tags
             ):
                 return True
             else:
                 return False
-        except:
-            return False
 
 
 if __name__ == "__main__":
@@ -150,7 +186,10 @@ if __name__ == "__main__":
         "-z", "--zip_uploads", action="store_true", help="Compacta a pasta 'uploads'."
     )
     parser.add_argument(
-        "-d", "--delete_virus", action="store_true", help="Deleta arquivos suspeitos."
+        "-d",
+        "--delete_suspicious_file",
+        action="store_true",
+        help="Deleta arquivos suspeitos.",
     )
 
     args = parser.parse_args()
@@ -158,9 +197,9 @@ if __name__ == "__main__":
     input_dir = args.input_dir
     output_dir = args.output_dir
     zip_uploads = args.zip_uploads
-    delete_virus = args.delete_virus
+    delete_suspicious_file = args.delete_suspicious_file
 
     os.makedirs(output_dir, exist_ok=True)
 
-    uploads = Uploads(input_dir, output_dir, zip_uploads, delete_virus)
+    uploads = Uploads(input_dir, output_dir, zip_uploads, delete_suspicious_file)
     uploads.zip_files()

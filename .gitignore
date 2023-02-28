@@ -130,3 +130,8 @@ dmypy.json
 
 # Python scripts
 zip_uploads_cloudways.py
+check_files_gpt.py
+sites_from_cloudways.py
+
+# directories
+/data
