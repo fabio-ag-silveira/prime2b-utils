@@ -135,3 +135,5 @@ sites_from_cloudways.py
 
 # directories
 /data
+/out
+/images
