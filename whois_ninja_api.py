@@ -15,23 +15,23 @@ class Whois(object):
     def verifica_dominios(self):
 
         df = pd.read_csv(self.csv_path)
-        # df["Titular"] = ""
-        # df["Contato Tecnico"] = ""
-        # df["Servidor DNS"] = ""
-        # df["Status do dominio"] = ""
-        # df["Observacao"] = ""
+        df["Titular"] = ""
+        df["Contato Tecnico"] = ""
+        df["Servidor DNS"] = ""
+        df["Status do dominio"] = ""
+        df["Observacao"] = ""
 
-        # for index, row in df.iterrows():
+        for index, row in df.iterrows():
 
-        #     domain = row["Dominio"]
-        #     print(f"Dominio: {domain}")
+            domain = row["Dominio"]
+            print(f"Dominio: {domain}")
 
-        #     if domain.endswith("br"):
-        #         self.dominio_br(domain, df, index)
-        #     else:
-        #         self.dominio_com(domain, df, index)
+            if domain.endswith("br"):
+                self.dominio_br(domain, df, index)
+            else:
+                self.dominio_com(domain, df, index)
 
-        #     df.to_csv(self.output_csv_path, index=False)
+            df.to_csv(self.output_csv_path, index=False)
         df.fillna("-", inplace=True)
         df.to_csv(self.output_csv_path, index=False)
 

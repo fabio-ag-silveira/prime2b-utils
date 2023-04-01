@@ -1,5 +1,7 @@
 import requests
+import time
 import pandas as pd
+
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
@@ -12,15 +14,12 @@ class Whois(object):
 
     def verifica_dominios(self):
 
-        # studiocorpointeligente.com.br
-
         df = pd.read_csv(self.csv_path)
         colunas = [
             "Titular",
             "Contato Tecnico",
             "Servidor DNS",
             "Status do dominio",
-            "Status da migracao",
             "Observacao",
         ]
 
@@ -30,40 +29,17 @@ class Whois(object):
 
         for index, row in df.iterrows():
 
-            # if index >= 1484:
-            #     domain = row["Dominio"]
-            #     print(f"Dominio: {domain}")
-            #     time.sleep(3)
+            domain = row["Dominio"]
+            print(f"Dominio: {domain}")
+            time.sleep(3)
 
-            #     if domain.endswith("br"):
-            #         self.registro_br_api(domain, df, index)
-            #     else:
-            #         self.whois_api_ninja(domain, df, index)
-
-            if (
-                "vultr.com" in row["Servidor DNS"]
-                and "AGGOW1" in row["Contato Tecnico"].upper()
-                and "active" == row["Status do dominio"]
-            ):
-                df.at[index, "Status da migracao"] = "Migrar"
-            elif (
-                "vultr.com" in row["Servidor DNS"]
-                and "AGGOW1" in row["Contato Tecnico"].upper()
-                and "inactive" == row["Status do dominio"]
-            ):
-                df.at[index, "Status da migracao"] = "Congelado"
-            elif (
-                "vultr.com" in row["Servidor DNS"]
-                and "AGGOW1" in row["Contato Tecnico"].upper()
-                and "-" == row["Status do dominio"]
-            ):
-                df.at[index, "Status da migracao"] = row["Observacao"]
+            if domain.endswith("br"):
+                self.registro_br_api(domain, df, index)
             else:
-                df.at[index, "Status da migracao"] = "-"
+                self.whois_api_ninja(domain, df, index)
 
-            # df.to_csv(self.output_csv_path, index=False)
+            df.to_csv(self.output_csv_path, index=False)
 
-        df.drop(columns=["Verificar"], axis=1, inplace=True)
         df.fillna("-", inplace=True)
         df.to_csv(self.output_csv_path, index=False)
 
